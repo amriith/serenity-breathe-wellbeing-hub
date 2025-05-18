@@ -1,13 +1,21 @@
-// Update this page (the content is just a fallback if you fail to update the page)
+
+import React from 'react';
+import { Route, Routes } from 'react-router-dom';
+import Home from './Home';
+import Breathing from './Breathing';
+import Music from './Music';
+import Tips from './Tips';
+import Progress from './Progress';
 
 const Index = () => {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      <div className="text-center">
-        <h1 className="text-4xl font-bold mb-4">Welcome to Your Blank App</h1>
-        <p className="text-xl text-gray-600">Start building your amazing project here!</p>
-      </div>
-    </div>
+    <Routes>
+      <Route path="/" element={<Home />} />
+      <Route path="/breathing" element={<Breathing />} />
+      <Route path="/music" element={<Music />} />
+      <Route path="/tips" element={<Tips />} />
+      <Route path="/progress" element={<Progress />} />
+    </Routes>
   );
 };
 
