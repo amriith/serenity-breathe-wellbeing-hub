@@ -1,8 +1,9 @@
-
 import React, { useState, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
+import { Input } from '@/components/ui/input';
+import { LogIn, User } from 'lucide-react';
 import Layout from '@/components/Layout';
 import { addMoodEntry } from '@/lib/userDataService';
 import { useNavigate } from 'react-router-dom';
@@ -26,8 +27,20 @@ const Home = () => {
   const [selectedMood, setSelectedMood] = useState<string | null>(null);
   const [stressLevel, setStressLevel] = useState<number>(5);
   const [quote, setQuote] = useState<string>("");
+  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
+  const [username, setUsername] = useState<string>("");
+  const [email, setEmail] = useState<string>("");
   const { toast } = useToast();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    // Check if user is already logged in
+    const savedUser = localStorage.getItem('serenity_user');
+    if (savedUser) {
+      setIsLoggedIn(true);
+      setUsername(JSON.parse(savedUser).username);
+    }
+  }, []);
 
   useEffect(() => {
     // Select a relevant quote based on mood or pick a general one
@@ -37,6 +50,41 @@ const Home = () => {
       setQuote(randomQuote.text);
     }
   }, [selectedMood]);
+
+  const handleLogin = () => {
+    if (!username.trim() || !email.trim()) {
+      toast({
+        title: "Login details required",
+        description: "Please enter both username and email",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    // Save user data
+    localStorage.setItem('serenity_user', JSON.stringify({ username, email }));
+    setIsLoggedIn(true);
+    
+    toast({
+      title: "Welcome to Serenity Breather!",
+      description: `Hello ${username}, let's start your wellness journey`,
+    });
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem('serenity_user');
+    setIsLoggedIn(false);
+    setUsername("");
+    setEmail("");
+    setSelectedMood(null);
+    setStressLevel(5);
+    setQuote("");
+    
+    toast({
+      title: "Logged out",
+      description: "Thank you for using Serenity Breather",
+    });
+  };
 
   const handleContinue = () => {
     if (!selectedMood) {
@@ -73,61 +121,128 @@ const Home = () => {
   };
 
   return (
-    <Layout title="Welcome" subtitle="How are you feeling today?" activePage="home">
+    <Layout title="Serenity Breather" subtitle="Your personal wellness companion" activePage="home">
       <div className="space-y-8 animate-fade-in">
-        <div className="bg-white rounded-2xl shadow-sm p-6 card-gradient">
-          <h2 className="text-xl font-medium mb-4">Select your mood</h2>
-          <div className="flex justify-between items-center my-6">
-            {MOODS.map((mood) => (
-              <button
-                key={mood.value}
-                onClick={() => setSelectedMood(mood.value)}
-                className={`flex flex-col items-center p-3 rounded-lg transition-all duration-300 ${
-                  selectedMood === mood.value
-                    ? "bg-serenity-green/20 scale-110"
-                    : "hover:bg-gray-50"
-                }`}
+        {/* Login Section */}
+        {!isLoggedIn ? (
+          <div className="bg-white rounded-2xl shadow-sm p-6 card-gradient">
+            <div className="flex items-center mb-4">
+              <LogIn className="w-6 h-6 text-serenity-green mr-2" />
+              <h2 className="text-xl font-medium">Welcome</h2>
+            </div>
+            <div className="space-y-4">
+              <Input
+                type="text"
+                placeholder="Enter your username"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                className="rounded-xl"
+              />
+              <Input
+                type="email"
+                placeholder="Enter your email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="rounded-xl"
+              />
+              <Button 
+                onClick={handleLogin}
+                className="w-full py-3 green-gradient border-0 hover:opacity-90 transition-opacity rounded-xl"
               >
-                <span className="text-4xl mb-2">{mood.emoji}</span>
-                <span className="text-sm text-gray-700">{mood.label}</span>
-              </button>
-            ))}
-          </div>
-        </div>
-
-        <div className="bg-white rounded-2xl shadow-sm p-6 card-gradient">
-          <h2 className="text-xl font-medium mb-4">Stress level</h2>
-          <div className="py-4">
-            <Slider
-              defaultValue={[5]}
-              max={10}
-              step={1}
-              value={[stressLevel]}
-              onValueChange={(value) => setStressLevel(value[0])}
-              className="my-6"
-            />
-            <div className="flex justify-between text-sm text-gray-500 mt-2">
-              <span>Low (0)</span>
-              <span>High (10)</span>
+                Start Your Journey
+              </Button>
             </div>
           </div>
-          <div className="text-center mt-2 text-gray-600">
-            Selected: {stressLevel}/10
-          </div>
-        </div>
-
-        {quote && (
-          <div className="text-center p-4 italic text-gray-600">
-            "{quote}"
+        ) : (
+          <div className="bg-white rounded-2xl shadow-sm p-6 card-gradient">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center">
+                <User className="w-6 h-6 text-serenity-green mr-2" />
+                <div>
+                  <h2 className="text-xl font-medium">Welcome back, {username}!</h2>
+                  <p className="text-sm text-gray-600">Ready for your wellness check-in?</p>
+                </div>
+              </div>
+              <Button 
+                onClick={handleLogout}
+                variant="outline"
+                size="sm"
+                className="rounded-xl"
+              >
+                Logout
+              </Button>
+            </div>
           </div>
         )}
 
-        <Button 
-          onClick={handleContinue}
-          className="w-full py-6 text-lg green-gradient border-0 hover:opacity-90 transition-opacity rounded-xl"
-        >
-          Continue
-        </Button>
+        {/* App Description */}
+        <div className="bg-white rounded-2xl shadow-sm p-6 card-gradient">
+          <h3 className="text-lg font-medium mb-3 text-serenity-green">About Serenity Breather</h3>
+          <p className="text-gray-700 leading-relaxed">
+            Designed specifically for university students, Serenity Breather helps you manage stress, 
+            anxiety, and emotional overload through personalized breathing exercises, calming music, 
+            and daily wellness tracking. Take a moment for yourself and find your inner peace.
+          </p>
+        </div>
+
+        {/* Existing mood tracking functionality */}
+        {isLoggedIn && (
+          <>
+            <div className="bg-white rounded-2xl shadow-sm p-6 card-gradient">
+              <h2 className="text-xl font-medium mb-4">How are you feeling today?</h2>
+              <div className="flex justify-between items-center my-6">
+                {MOODS.map((mood) => (
+                  <button
+                    key={mood.value}
+                    onClick={() => setSelectedMood(mood.value)}
+                    className={`flex flex-col items-center p-3 rounded-lg transition-all duration-300 ${
+                      selectedMood === mood.value
+                        ? "bg-serenity-green/20 scale-110"
+                        : "hover:bg-gray-50"
+                    }`}
+                  >
+                    <span className="text-4xl mb-2">{mood.emoji}</span>
+                    <span className="text-sm text-gray-700">{mood.label}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="bg-white rounded-2xl shadow-sm p-6 card-gradient">
+              <h2 className="text-xl font-medium mb-4">Stress level</h2>
+              <div className="py-4">
+                <Slider
+                  defaultValue={[5]}
+                  max={10}
+                  step={1}
+                  value={[stressLevel]}
+                  onValueChange={(value) => setStressLevel(value[0])}
+                  className="my-6"
+                />
+                <div className="flex justify-between text-sm text-gray-500 mt-2">
+                  <span>Low (0)</span>
+                  <span>High (10)</span>
+                </div>
+              </div>
+              <div className="text-center mt-2 text-gray-600">
+                Selected: {stressLevel}/10
+              </div>
+            </div>
+
+            {quote && (
+              <div className="text-center p-4 italic text-gray-600">
+                "{quote}"
+              </div>
+            )}
+
+            <Button 
+              onClick={handleContinue}
+              className="w-full py-6 text-lg green-gradient border-0 hover:opacity-90 transition-opacity rounded-xl"
+            >
+              Continue
+            </Button>
+          </>
+        )}
       </div>
     </Layout>
   );
