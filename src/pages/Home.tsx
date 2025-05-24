@@ -3,7 +3,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
 import { Input } from '@/components/ui/input';
-import { LogIn, User } from 'lucide-react';
+import { LogIn, User, ArrowRight, Play, Heart } from 'lucide-react';
 import Layout from '@/components/Layout';
 import { addMoodEntry } from '@/lib/userDataService';
 import { useNavigate } from 'react-router-dom';
@@ -120,6 +120,34 @@ const Home = () => {
     }
   };
 
+  const handleTryDemo = () => {
+    toast({
+      title: "Demo Mode",
+      description: "Let's try a quick breathing exercise!",
+    });
+    navigate("/breathing");
+  };
+
+  const handleExploreMusic = () => {
+    toast({
+      title: "Discover Calm",
+      description: "Explore our collection of soothing sounds",
+    });
+    navigate("/music");
+  };
+
+  const handleViewProgress = () => {
+    if (!isLoggedIn) {
+      toast({
+        title: "Login Required",
+        description: "Please log in to view your progress",
+        variant: "destructive",
+      });
+      return;
+    }
+    navigate("/progress");
+  };
+
   return (
     <Layout title="Serenity Breather" subtitle="Your personal wellness companion" activePage="home">
       <div className="space-y-8 animate-fade-in">
@@ -149,6 +177,7 @@ const Home = () => {
                 onClick={handleLogin}
                 className="w-full py-3 green-gradient border-0 hover:opacity-90 transition-opacity rounded-xl"
               >
+                <LogIn className="w-4 h-4 mr-2" />
                 Start Your Journey
               </Button>
             </div>
@@ -178,11 +207,39 @@ const Home = () => {
         {/* App Description */}
         <div className="bg-white rounded-2xl shadow-sm p-6 card-gradient">
           <h3 className="text-lg font-medium mb-3 text-serenity-green">About Serenity Breather</h3>
-          <p className="text-gray-700 leading-relaxed">
+          <p className="text-gray-700 leading-relaxed mb-4">
             Designed specifically for university students, Serenity Breather helps you manage stress, 
             anxiety, and emotional overload through personalized breathing exercises, calming music, 
             and daily wellness tracking. Take a moment for yourself and find your inner peace.
           </p>
+          
+          {/* Call to Action Buttons */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-6">
+            <Button 
+              onClick={handleTryDemo}
+              variant="outline"
+              className="flex items-center justify-center py-3 rounded-xl border-serenity-green text-serenity-green hover:bg-serenity-green hover:text-white transition-all"
+            >
+              <Play className="w-4 h-4 mr-2" />
+              Try Demo
+            </Button>
+            <Button 
+              onClick={handleExploreMusic}
+              variant="outline"
+              className="flex items-center justify-center py-3 rounded-xl border-blue-400 text-blue-600 hover:bg-blue-400 hover:text-white transition-all"
+            >
+              <Heart className="w-4 h-4 mr-2" />
+              Explore Music
+            </Button>
+            <Button 
+              onClick={handleViewProgress}
+              variant="outline"
+              className="flex items-center justify-center py-3 rounded-xl border-purple-400 text-purple-600 hover:bg-purple-400 hover:text-white transition-all"
+            >
+              <ArrowRight className="w-4 h-4 mr-2" />
+              View Progress
+            </Button>
+          </div>
         </div>
 
         {/* Existing mood tracking functionality */}
@@ -239,6 +296,7 @@ const Home = () => {
               onClick={handleContinue}
               className="w-full py-6 text-lg green-gradient border-0 hover:opacity-90 transition-opacity rounded-xl"
             >
+              <ArrowRight className="w-5 h-5 mr-2" />
               Continue
             </Button>
           </>
